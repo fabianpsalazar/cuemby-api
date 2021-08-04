@@ -16,4 +16,4 @@ class Players(models.Model):
     players_id = models.ForeignKey(Teams, on_delete=models.CASCADE, verbose_name='related players')
     name = models.CharField(max_length=100) 
     position = models.CharField(max_length=5)
-    nation = models.models.CharField(max_length=20)
+    nation = models.CharField(max_length=20)
