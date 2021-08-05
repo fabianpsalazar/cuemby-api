@@ -4,7 +4,7 @@ from fifa import views
 
 urlpatterns = [
     # for GET
-    path('v1/players', views.Fifa_api.as_view({'get':'get'})),
+    path('v1/players', views.Fifa_get.as_view()),
     # for POST
-    path('v1/teams',views.Fifa_api.as_view({'post':'get'}))
+    path('v1/teams', views.Fifa_post.as_view())
 ]
