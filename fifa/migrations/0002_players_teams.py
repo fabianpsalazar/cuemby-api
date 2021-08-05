@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Teams',
             fields=[
-                ('team_id', models.AutoField(primary_key=True, serialize=False)),
                 ('page', models.IntegerField()),
                 ('total_pages', models.IntegerField()),
                 ('items', models.IntegerField()),
@@ -27,8 +26,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('position', models.CharField(max_length=5)),
-                ('nation', models.CharField(max_length=20)),
-                ('players_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='fifa.Teams', verbose_name='related players')),
+                ('nation', models.CharField(max_length=100)),
             ],
         ),
     ]
