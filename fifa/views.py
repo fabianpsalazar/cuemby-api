@@ -28,6 +28,7 @@ def save_players():
                 players.save()
             except:
                 continue
+#Ejecutar solo una vez para guardar en la base de datos local
 #save_players()
 
 class Fifa_get(APIView):
