@@ -6,11 +6,10 @@ from rest_framework import response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-''' code HTTP status as responses'''
 from rest_framework import status
 from . import serializers
-from .models import Players, Teams
-'''To run pending to execute the virtual env'''
+from .models import Players
+from rest_framework.permissions import IsAuthenticated
 import requests
 import json
 
@@ -29,24 +28,24 @@ def save_players():
                 players.save()
             except:
                 continue
-
 #save_players()
-# Create your views here.
+
 class Fifa_get(APIView):
-    '''Class of API view'''
-    serializer_class = serializers.TeamSerializers
 
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.PlayerSerializers
 
-    def get_query(self,player, ord):
+    def get_players(self,player, ord='asc'):
+        if ord == 'desc':
+            players = Players.objects.filter(name__icontains=player).order_by('-name')
+            return players
         players = Players.objects.filter(name__icontains=player).order_by('name')
         return players
-    '''This set our API view to have the serializer class'''
-    #Each function must return a response object
+
     def get(self, request, *args, **kwargs):
 
         try:
             search = request.query_params['search']
-            page = int(request.query_params['page'])
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
@@ -54,35 +53,49 @@ class Fifa_get(APIView):
             order = request.query_params['order'].lower()
         except:
             order = 'asc'
-            
-        players = self.get_query(search, order)
-        serializer = serializers.TeamSerializers(players, many=True)
-        #Response transform the information to JSON, this information
-        #must be an array or a dict
+                    
+        players = self.get_players(search, order)
+        serializer = serializers.PlayerSerializers(players, many=True)
+
         return Response({
             'Player': serializer.data,
 
             })
-        '''Now we can create a URL to view this api view through URL'''
 
 class Fifa_post(APIView):
 
-    def post(self, request, *args, **kwargs):
-        '''Create a message with our name'''
-        #Self.serializer is a class that set out class with the API view, standart method
-        serializer = self.serializer_class(data=request.data)
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.TeamSerializers
+        
+    def get(self, request, format=None):
+
+        return Response({
+            'Message': 'Hello! Enter your team.'
+        })
+
+    def get_team(self, team_name, page=1):
+
+        team_players = Players.objects.filter(club__iexact=team_name) #add here page filter
+        return team_players
+
+    def post(self, request):
+
+        serializer = serializers.TeamSerializers(data=request.data)
         if serializer.is_valid():
-            '''This datas must be validated'''
-            name = serializer.validated_data.get('team_name')
-            page = serializer.validate_data.get('page')
-            
-            message = f'Hello {name}'
-            return Response({
-                'message': message
-            })
-        #Not valid information
+            team = serializer.validated_data.get('club')
+            team_players = self.get_team(team)
+            players_serializer = serializers.ClubSerializers(team_players, many=True)    
+
+            if players_serializer.data :
+                return Response({
+                    'players': players_serializer.data,
+                })
+            else:
+                return Response({
+                    'Message': 'Empty query'
+                })
         else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({
+                'error': 'Bad input'
+            })
